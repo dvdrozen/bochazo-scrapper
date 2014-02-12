@@ -11,6 +11,13 @@ var urls = ["http://www.haycancha.com/busqueda.php",
 
 var url = urls[0];
 
+if (typeof String.prototype.startsWith != 'function') {
+  // see below for better implementation!
+  String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+  };
+}
+
 function getPlaces(data) {
 	var places = [];
 	var $ = cheerio.load(data);
@@ -26,26 +33,32 @@ function getPlaces(data) {
         		var place = {};
         		var link = "";
 
-    			//Name
+      			//Name
         		$(t).find("a").each(function(k, a) {
-					if( $(a).attr("class") != "txt_verde_11" ) {
-						place.name = $(a).text().trim();
-					}
-				});
+    					if( $(a).attr("class") != "txt_verde_11" ) {
+    						place.name = $(a).text().trim();
+    					}
+    				});
 
-    			//Courts number
-				$(t).find(".txt_verde_11").each(function(k, a) {
-					//console.log(a);
-					console.log($(a).text());
-				});
+      			//Address & Phone
+    				$(t).find(".txt_verde_11").each(function(k, a) {
+    					var element = $(a).text().trim();
+              var e = $(a);
 
-    			//Address
+              if( element && !element.startsWith('[+]') && element[0] != "(" && j <= 47 ) { //WTF
 
-    			//Phone
+                  if( isNaN(element[0]) ) {
+                      place.address = element;
+                  } else {
+                      place.phones = element;
+                  }
+              }
+    				});
 
-				//Link
+  				  //Get detail data
 
-				places.push(place);
+
+  				  places.push(place);
         	}
         });
 
